@@ -1,0 +1,11 @@
+# Sample Local Breach Dump Database for BreachHunter OSINT
+# Format: email:password or email:hash or username:password
+sayanchakraborty9@gmail.com:Collection1_Sample_P@ssw0rd2024
+admin@evilcorp.com:P@ssw0rd2024!
+john.smith@gmail.com:SecretPASS123
+test@evilcorp.com:An0therSECRETpassw0rd
+test@example.com:Ex@mplePassw0rd99
+finance@evilcorp.com:MoneyTalks#889
+developer@techstartup.io:GitCommit#2023!
+ceo@evilcorp.com:C30_M@sterKey999
+
