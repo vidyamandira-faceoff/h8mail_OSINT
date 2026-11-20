@@ -52,8 +52,8 @@ class target:
         self.debug = debug
         if debug:
             print(
-                c.fg.red,
-                f"DEBUG: Created target object for {self.target}",
+                c.fg.cyan,
+                f"[*] DEBUG: Created target object for {self.target}",
                 c.reset,
             )
 
@@ -75,6 +75,7 @@ class target:
         verify=True,
         auth=None,
     ):
+        response = None
         try:
             response = requests.request(
                 url=url,
@@ -88,7 +89,7 @@ class target:
                 auth=auth,
             )
             # response = requests.request(url="http://127.0.0.1:8000", headers=self.headers, method=meth, timeout=timeout, allow_redirects=redirs, data=data, params=params)
-            if self.debug:
+            if self.debug and response is not None:
                 c.debug_news("DEBUG: Sent the following---------------------")
                 print(self.headers)
                 print(url, meth, data, params)
@@ -104,10 +105,10 @@ class target:
                 print(response.content)
                 # print(response)
         except Exception as ex:
-            c.bad_news("Request could not be made for " + self.target)
-            print(url)
-            print(ex)
-            print(response)
+            if self.debug:
+                c.bad_news("Request could not be made for " + self.target)
+                print(url)
+                print(ex)
         return response
 
     # New HIBP API

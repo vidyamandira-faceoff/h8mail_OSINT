@@ -112,4 +112,7 @@ keysbackup.ini
 .vscode/launch.json
 file1.bin
 *.txt
+!backend/data/sample_breaches.txt
 test.json
+backend/web_history.json
+backend/web_config.json

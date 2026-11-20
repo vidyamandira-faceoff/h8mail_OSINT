@@ -1,9 +1,8 @@
 FROM python:3-alpine
 
 RUN apk add --update --no-cache git bash
-WORKDIR h8mail
-RUN pip3 install requests
+WORKDIR /h8mail
 COPY . .
-RUN ["python", "setup.py", "install"]
+RUN pip install --no-cache-dir .
 ENTRYPOINT ["h8mail"]
 CMD ["-h"]
