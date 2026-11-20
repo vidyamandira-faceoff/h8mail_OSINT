@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BreachHunter OSINT | Multi-Target Breach & Credential Intelligence</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="header">
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-logo">BH</div>
+        <div class="brand-text">
+          <h1>BreachHunter <span>OSINT</span></h1>
+          <p>Multi-Target Breach & Credential Intelligence Platform</p>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="tab-hunter">
+          <span>🔍</span> Breach Hunter
+        </button>
+        <button class="nav-btn" data-tab="tab-local">
+          <span>📁</span> Local Scans
+        </button>
+        <button class="nav-btn" data-tab="tab-config">
+          <span>🔑</span> API Settings
+        </button>
+        <button class="nav-btn" data-tab="tab-history">
+          <span>📜</span> History
+        </button>
+      </nav>
+
+      <div class="status-badge" id="backend-status-badge">
+        <div class="status-dot"></div>
+        <span id="backend-status-text">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- TAB 1: BREACH HUNTER -->
+    <section id="tab-hunter" class="tab-pane active">
+      
+      <!-- Main Target Reconnaissance Card -->
+      <div class="card hunter-main-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title"><span class="icon">🎯</span> Target Reconnaissance</h2>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;">
+              Scan emails, usernames, or domains across live breach databases and local leak archives
+            </p>
+          </div>
+          <div class="button-bar">
+            <button type="button" class="btn btn-secondary" id="btn-load-breached-sample" style="padding: 0.35rem 0.7rem; font-size: 0.78rem; border-color: rgba(239, 68, 68, 0.4); color: #f87171; background: rgba(239, 68, 68, 0.08);">
+              🔴 Test Breached Demo
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-clear-targets" style="padding: 0.35rem 0.7rem; font-size: 0.78rem;">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <form id="hunter-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="query-type">Query Type</label>
+              <select id="query-type" class="select-input">
+                <option value="email" selected>Email Address (Standard)</option>
+                <option value="username">Username</option>
+                <option value="domain">Domain Name</option>
+                <option value="ip">IP Address</option>
+                <option value="hash">Password Hash</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Or Upload Targets File (.txt)</label>
+              <input type="file" id="targets-file-input" accept=".txt" class="input-text">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="raw-targets">
+              Target(s) to Scan <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(One email/target per line or comma-separated)</span>
+            </label>
+            <textarea 
+              id="raw-targets" 
+              class="textarea-input" 
+              style="min-height: 120px; font-family: var(--font-mono); font-size: 0.9rem;"
+              placeholder="example@gmail.com&#10;test@example.com&#10;sayanchakraborty9@gmail.com"
+              required
+            ></textarea>
+          </div>
+
+          <!-- Configuration & Options Grid -->
+          <div class="checkbox-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
+            <label class="checkbox-card">
+              <input type="checkbox" id="opt-sample-db" checked>
+              <div>
+                <strong>Include Local Demo Breach DB</strong>
+                <div class="subtext">Checks local sample dumps for immediate test verification</div>
+              </div>
+            </label>
+
+            <label class="checkbox-card warn-card">
+              <input type="checkbox" id="opt-skip-defaults">
+              <div>
+                <strong style="color: #fbbf24;">Offline Mode Only (-sk)</strong>
+                <div class="subtext">Skips all online APIs (leave unchecked to search live web)</div>
+              </div>
+            </label>
+
+            <label class="checkbox-card">
+              <input type="checkbox" id="opt-hide-passwords">
+              <div>
+                <strong>Mask Sensitive Passwords (--hide)</strong>
+                <div class="subtext">Obfuscates leaked passwords (shows only first 4 chars)</div>
+              </div>
+            </label>
+
+            <label class="checkbox-card">
+              <input type="checkbox" id="opt-debug">
+              <div>
+                <strong>Enable Request Debugging Logs</strong>
+                <div class="subtext">Prints detailed request telemetry in terminal</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="button-bar" style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary btn-large-hunt" id="btn-submit-search">
+              <span id="btn-search-icon">⚡</span>
+              <span id="btn-search-text">Launch OSINT Hunt</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Results Section -->
+      <section id="results-section" style="display: none; margin-top: 1.5rem;">
+        
+        <!-- Statistics Counter Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-label">Total Targets</span>
+            <span class="stat-value" id="stat-total">0</span>
+          </div>
+          <div class="stat-card breached">
+            <span class="stat-label">Compromised</span>
+            <span class="stat-value" id="stat-breached">0</span>
+          </div>
+          <div class="stat-card safe">
+            <span class="stat-label">Not Compromised</span>
+            <span class="stat-value" id="stat-safe">0</span>
+          </div>
+          <div class="stat-card time">
+            <span class="stat-label">Execution Time</span>
+            <span class="stat-value" id="stat-time">0.00s</span>
+          </div>
+        </div>
+
+        <!-- Filter and Search Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div class="button-bar">
+            <button class="btn btn-secondary filter-btn active" data-filter="all">All Targets (<span id="count-filter-all">0</span>)</button>
+            <button class="btn btn-secondary filter-btn" data-filter="breached" style="color: #f87171;">🔴 Compromised (<span id="count-filter-breached">0</span>)</button>
+            <button class="btn btn-secondary filter-btn" data-filter="safe" style="color: #34d399;">🟢 Safe (<span id="count-filter-safe">0</span>)</button>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="results-search-input" class="input-text" placeholder="Filter results..." style="width: 220px; padding: 0.45rem 0.75rem; font-size: 0.82rem;">
+            <button class="btn btn-secondary" id="btn-export-csv" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">📥 CSV</button>
+            <button class="btn btn-secondary" id="btn-export-json" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">📥 JSON</button>
+          </div>
+        </div>
+
+        <!-- Results Table Card -->
+        <div class="results-card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="icon">📊</span> Breach Reconnaissance Findings</h2>
+            <span id="results-count-label" style="font-size: 0.82rem; color: var(--text-muted);">Showing all results</span>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">Target Identifier</th>
+                  <th style="width: 24%;">Exposure Status</th>
+                  <th style="width: 48%;">Breach Findings & Sources</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </section>
+
+    <!-- TAB 2: LOCAL SCANS -->
+    <section id="tab-local" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><span class="icon">📁</span> Local File & Dump Scanning</h2>
+          <button type="button" class="btn btn-secondary" id="btn-local-load-demo" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; color: var(--accent-cyan);">
+            ⚡ Load Built-in Demo DB
+          </button>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          Search large cleartext password dumps (.txt) or compressed gzip archives (.tar.gz) locally using Python multiprocessing.
+        </p>
+
+        <form id="local-scan-form">
+          <div class="form-group">
+            <label class="form-label" for="local-cleartext-path">Local Cleartext File / Directory Path</label>
+            <input type="text" id="local-cleartext-path" class="input-text" placeholder="e.g. backend/data/sample_breaches.txt or /path/to/dumps/">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="local-gzip-path">Local Gzip / Tar.Gz File Path</label>
+            <input type="text" id="local-gzip-path" class="input-text" placeholder="/path/to/Collection1.tar.gz">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="local-targets">Targets to Check (One per line)</label>
+            <textarea id="local-targets" class="textarea-input" placeholder="sayanchakraborty9@gmail.com&#10;john.smith@gmail.com&#10;admin@evilcorp.com"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-local-submit">
+            <span id="btn-local-icon">⚡</span>
+            <span id="btn-local-text">Run Local File Scan</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 3: API SETTINGS -->
+    <section id="tab-config" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><span class="icon">🔑</span> Reconnaissance API Configuration</h2>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Saved securely in backend</span>
+        </div>
+
+        <form id="config-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label">HaveIBeenPwned (v3) API Key</label>
+              <input type="password" id="cfg-hibp" class="input-text" placeholder="HIBP v3 Key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hunter.io API Key</label>
+              <input type="password" id="cfg-hunterio" class="input-text" placeholder="Hunter.io private key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">EmailRep.io API Key</label>
+              <input type="password" id="cfg-emailrep" class="input-text" placeholder="Free key from emailrep.io/key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Snusbase API Token</label>
+              <input type="password" id="cfg-snusbase" class="input-text" placeholder="Snusbase token">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">IntelX API Key</label>
+              <input type="password" id="cfg-intelx" class="input-text" placeholder="IntelX key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">DeHashed Email</label>
+              <input type="text" id="cfg-dehashed-email" class="input-text" placeholder="account@example.com">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">DeHashed API Key</label>
+              <input type="password" id="cfg-dehashed-key" class="input-text" placeholder="DeHashed key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Leak-Lookup Private Key</label>
+              <input type="password" id="cfg-leaklookup" class="input-text" placeholder="Leak-Lookup private key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">BreachDirectory Password</label>
+              <input type="password" id="cfg-breachdirectory" class="input-text" placeholder="BreachDirectory password">
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary">
+              <span>💾</span> Save API Settings
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 4: HISTORY -->
+    <section id="tab-history" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><span class="icon">📜</span> Recent Reconnaissance Sessions</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" id="btn-refresh-history" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+              🔄 Refresh
+            </button>
+            <button class="btn btn-secondary" id="btn-clear-history" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+              🗑️ Clear History
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th style="width: 10%;">Scan ID</th>
+                <th style="width: 15%;">Timestamp</th>
+                <th style="width: 20%;">Target(s)</th>
+                <th style="width: 10%;">Timing</th>
+                <th style="width: 15%;">Result</th>
+                <th style="width: 18%;">Breach Highlights</th>
+                <th style="width: 12%; text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No recent searches in this session yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- History Details Modal -->
+  <div id="history-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">
+          <span>🔍</span> Scan Details
+        </h3>
+        <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamically injected -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-close-action">Close</button>
+        <button class="btn btn-primary" id="modal-rescan-btn">⚡ Re-scan Targets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">Action performed successfully</div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    BreachHunter OSINT Platform • Multi-Target Breach Reconnaissance • Use Responsibly
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
